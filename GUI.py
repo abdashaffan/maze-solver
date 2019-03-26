@@ -8,9 +8,10 @@ import os
 
 
 BG_COLOR = 'black'
+BLOCK_SIZE = 24
 
 
-# Definisi kelas dari modul turtle yang dipakai untuk menggambar pada GUI
+# Kelas dari modul turtle yang dipakai untuk menggambar maze
 class Pen(turtle.Turtle):
     def __init__(self):
         turtle.Turtle.__init__(self)
@@ -23,16 +24,18 @@ class Pen(turtle.Turtle):
 
 
 def blockSize(numOfRows):
-    if numOfRows > 40:
-        return 15
-    elif numOfRows > 30:
-        return 20
-
-    return 24  # default
+    # if numOfRows > 40:
+    #     return 15
+    # elif numOfRows > 30:
+    #     return 20
+    return 24  # default pen size
 
 
 # Fungsi pembuat maze
-def init_maze(maze, pen, windowHeight, windowWidth, blockSize):
+def init_maze(maze, windowHeight, windowWidth, blockSize):
+
+    pen = Pen()
+
     for y in range(len(maze)):
         for x in range(len(maze[y])):
 
@@ -43,45 +46,76 @@ def init_maze(maze, pen, windowHeight, windowWidth, blockSize):
             scr_y = windowHeight/2 - y*blockSize - 0.5*blockSize
 
             # Gambar tembok
-            if block == '1':
-                pen.goto(scr_x, scr_y)
+            pen.goto(scr_x, scr_y)
+            if block == 'S':
+                pen.color('red')
+                pen.stamp()
+            elif block == 'F':
+                pen.color('green')
+                pen.stamp()
+            elif block == '1':
+                pen.color('white')
                 pen.stamp()
 
-
 # Program utama
+
+
 def main():
+
+    # Input nama file
+    print('Masukkan nama file tempat maze disimpan (dengan .txt)')
+    print('(harus ada di dalam folder mazes) : ', end='')
+    fileName = input()
+
+    print('Masukkan koordinat titik start <x y>: ', end='')
+    xStart, yStart = map(int, input().split())
+    print('Masukkan koordinat titik finish <x y>: ', end='')
+    xFinish, yFinish = map(int, input().split())
+
+    print("Kok ga dianggep :(")  # Di-ignore sampe windownya di-close
 
     # Menyimpan data matrix dari text file di dalam folder "mazes"
     # Hanya bisa menerima bentuk maze persegi panjang (sisi yang berhadapan panjangnya sama)
-    with open(os.path.join("./mazes", "maze-md.txt"), "r") as f:
+
+    with open(os.path.join("./mazes", fileName), "r") as f:
         data = f.readlines()
 
     # Import data ke array 2D
     maze = []
     for row in data:
+        # Hapus newline jika ada
         if (row[-1] == '\n'):
             mazeRow = row[:-1]
         else:
             mazeRow = row
         maze.append(mazeRow)
 
-    BLOCK_SIZE = blockSize(len(maze))
+    # Set titik start dan finish
+    temp1 = list(maze[xStart])
+    temp1[yStart] = 'S'
+    maze[xStart] = ''.join(temp1)
+
+    temp2 = list(maze[xFinish])
+    temp2[yFinish] = 'F'
+    maze[xFinish] = ''.join(temp2)
 
     windowHeight = len(maze)*BLOCK_SIZE
     windowWidth = len(maze[0])*BLOCK_SIZE
 
-    # Setting window GUI
+    # Set window GUI
     wn = turtle.Screen()
     wn.bgcolor(BG_COLOR)
-    # wn.screensize(windowHeight, windowWidth)
-    wn.setup(height=1.0, width=1.0)
+    if (len(maze) <= 25 and len(maze[0]) <= 25):
+        wn.setup(height=1.0, width=1.0)
+    else:
+        wn.screensize(windowHeight, windowWidth)
     wn.title("Maze solver dengan BFS dan A*")
 
     # Membuat maze
-    pen = Pen()
-    init_maze(maze, pen, windowHeight, windowWidth, BLOCK_SIZE)
+    init_maze(maze, windowHeight, windowWidth, BLOCK_SIZE)
 
-    turtle.done()
+    wn.exitonclick()
+    # turtle.done()
 
 
 # Memanggil program utama
