@@ -3,19 +3,30 @@ import turtle
 import os
 
 
+'''
+BAGIAN PENGATURAN GUI
+'''
 BG_COLOR = 'black'
+PEN_COLOR = 'white'
 BLOCK_SIZE = 24
 
-
 # Kelas dari modul turtle yang dipakai untuk menggambar maze
+
+
 class Pen(turtle.Turtle):
     def __init__(self):
         turtle.Turtle.__init__(self)
         self.hideturtle()
         self.penup()
         self.shape("square")
-        self.color("white")
+        self.color(PEN_COLOR)
         self.speed(0)
+
+
+class Point():
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
 # Asumsi: pada maze hanya terdapat 1 entrace dan 1 exit
 
@@ -43,8 +54,8 @@ def setEntraceExit(maze):
             elif not p2:
                 p2.extend([i, (col - 1)])
 
-    print("(1) <" + str(p1[0]) + " , " + str(p1[1]) + ">")
-    print("(2) <" + str(p2[0]) + " , " + str(p2[1]) + ">")
+    print("(1) <" + str(p1[0]) + "," + str(p1[1]) + ">")
+    print("(2) <" + str(p2[0]) + "," + str(p2[1]) + ">")
     print('pilih posisi start (1/2): ')
     choice = input()
     if choice == '1':
@@ -70,37 +81,43 @@ def setEntraceExit(maze):
     return maze
 
 
-def setPosition(pen, x, y, winHeight, winWidth):
+def setPosition(pen, point, winHeight, winWidth):
 
-    scr_x = -winWidth/2 + y*BLOCK_SIZE + 0.5*BLOCK_SIZE
-    scr_y = winHeight/2 - x*BLOCK_SIZE - 0.5*BLOCK_SIZE
+    scr_x = -winWidth/2 + point.y*BLOCK_SIZE + 0.5*BLOCK_SIZE
+    scr_y = winHeight/2 - point.x*BLOCK_SIZE - 0.5*BLOCK_SIZE
 
     pen.goto(scr_x, scr_y)
 
 
-def drawPath(pen, x, y, winHeight, winWidth):
+def drawPath(pen, point, winHeight, winWidth):
     pen.color('green')
-    setPosition(pen, x, y, winHeight, winWidth)
+    setPosition(pen, point.x, point.y, winHeight, winWidth)
     pen.stamp()
 
 
-def erasePath(pen, x, y, winHeight, winWidth):
+def erasePath(pen, point, winHeight, winWidth):
     pen.color(BG_COLOR)
-    setPosition(pen, x, y, winHeight, winWidth)
+    setPosition(pen, point.x, point.y, winHeight, winWidth)
     pen.stamp()
+
+
+def isWall(maze, point):
+    return (maze[point.x][point.y] == '0')
 
 # Fungsi pembuat maze
-def init_maze(maze, windowHeight, windowWidth):
+
+
+def initMaze(maze, windowHeight, windowWidth):
 
     pen = Pen()
 
     for x in range(len(maze)):
         for y in range(len(maze[0])):
-
+            p = Point(x, y)
             block = maze[x][y]
 
             # Setting supaya mazenya ada di tengah window
-            setPosition(pen, x, y, windowHeight, windowWidth)
+            setPosition(pen, p, windowHeight, windowWidth)
 
             # Gambar tembok
             if block == 'S':
@@ -110,11 +127,24 @@ def init_maze(maze, windowHeight, windowWidth):
                 pen.color('green')
                 pen.stamp()
             elif block == '1':
-                pen.color('white')
+                pen.color(PEN_COLOR)
                 pen.stamp()
 
 
-# Program utama
+'''
+BAGIAN ALGORITMA PENYELESAIAN
+'''
+
+
+def manhattanDistance(p1, p2):
+    return (abs(p1.x-p2.x) + abs(p1.y-p2.y))
+
+
+'''
+PROGRAM UTAMA
+'''
+
+
 def main():
 
     # Input nama file
@@ -152,7 +182,7 @@ def main():
     wn.title("Maze solver dengan BFS dan A*")
 
     # Membuat maze
-    init_maze(maze, windowHeight, windowWidth)
+    initMaze(maze, windowHeight, windowWidth)
 
     wn.exitonclick()
     # turtle.done()
