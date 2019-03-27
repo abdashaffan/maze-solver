@@ -12,6 +12,8 @@ PEN_COLOR = 'white'
 BLOCK_SIZE = 24
 
 # Kelas dari modul turtle yang dipakai untuk menggambar maze
+
+
 class Pen(turtle.Turtle):
     def __init__(self):
         turtle.Turtle.__init__(self)
@@ -36,16 +38,16 @@ def initMaze(maze, windowHeight, windowWidth, startPoint, finishPoint):
 
     for x in range(len(maze)):
         for y in range(len(maze[0])):
-            p = [x,y]
+            p = [x, y]
             block = maze[x][y]
 
             # Setting supaya mazenya ada di tengah window
             setPosition(pen, p, windowHeight, windowWidth)
 
-            if (x == startPoint.x and y == startPoint.y):
+            if (x == startPoint[0] and y == startPoint[1]):
                 pen.color('red')
                 pen.stamp()
-            elif (x == finishPoint.x and y == finishPoint.y):
+            elif (x == finishPoint[0] and y == finishPoint[1]):
                 pen.color('blue')
                 pen.stamp()
             elif block == '1':
@@ -93,14 +95,14 @@ def setEntraceExit(maze, startPoint, finishPoint):
         yFinish = p1[1]
 
     # pass startPoint and finishPoint
-    startPoint.x = xStart
-    startPoint.y = yStart
-    finishPoint.x = xFinish
-    finishPoint.y = yFinish
+    startPoint.extend([xStart, yStart])
+    finishPoint.extend([xFinish, yFinish])
 
     return maze
 
-#Set posisi pen pada posisi window tempat penggambaran akan dilakukan
+# Set posisi pen pada posisi window tempat penggambaran akan dilakukan
+
+
 def setPosition(pen, point, winHeight, winWidth):
 
     scr_x = -winWidth/2 + point[1]*BLOCK_SIZE + 0.5*BLOCK_SIZE
@@ -108,13 +110,17 @@ def setPosition(pen, point, winHeight, winWidth):
 
     pen.goto(scr_x, scr_y)
 
-#Menggambar 1 petak path pada turtle
+# Menggambar 1 petak path pada turtle
+
+
 def drawPath(pen, point, winHeight, winWidth):
     pen.color('green')
     setPosition(pen, point, winHeight, winWidth)
     pen.stamp()
 
-#Menghapus 1 petak path pada turtle
+# Menghapus 1 petak path pada turtle
+
+
 def erasePath(pen, point, winHeight, winWidth):
     pen.color(BG_COLOR)
     setPosition(pen, point[0], point[1], winHeight, winWidth)
@@ -130,6 +136,8 @@ def animatePath(path, winHeight, winWidth):
 '''
 BAGIAN ALGORITMA PENYELESAIAN
 '''
+
+
 def manhattanDistance(p1, p2):
     return (abs(p1.x-p2.x) + abs(p1.y-p2.y))
 
@@ -137,6 +145,8 @@ def manhattanDistance(p1, p2):
 '''
 PROGRAM UTAMA
 '''
+
+
 def main():
 
     # Input nama file
@@ -159,14 +169,10 @@ def main():
             mazeRow = row
         maze.append(mazeRow)
 
-    startPoint = Point()
-    finishPoint = Point()
+    start = []
+    finish = []
 
-    maze = setEntraceExit(maze, startPoint, finishPoint).copy()
-
-    start = [startPoint.x, startPoint.y]
-    finish = [finishPoint.x, finishPoint.y]
-
+    maze = setEntraceExit(maze, start, finish).copy()
 
     ############### BIKIN 1 FUNGSI SENDIRI DI bfs.py ###############
     arrived = []
@@ -198,12 +204,12 @@ def main():
                 new_path = list(path)
                 for j in i:
                     new_path.append(j)
-                res.append(new_path) 
+                res.append(new_path)
 
-    #mengembalikan path hasil pencarian, akan digunakan pada animasi
+    # mengembalikan path hasil pencarian, akan digunakan pada animasi
     ############### BIKIN 1 FUNGSI SENDIRI DI bfs.py ###############
-    
-    #Set ukuran window
+
+    # Set ukuran window
     windowHeight = len(maze)*BLOCK_SIZE
     windowWidth = len(maze[0])*BLOCK_SIZE
 
@@ -217,9 +223,9 @@ def main():
     wn.title("Maze solver dengan BFS dan A*")
 
     # Membuat maze
-    initMaze(maze, windowHeight, windowWidth, startPoint, finishPoint)
-    #Menggambar path final pada GUI
-    animatePath(path,windowHeight,windowWidth)
+    initMaze(maze, windowHeight, windowWidth, start, finish)
+    # Menggambar path final pada GUI
+    animatePath(path, windowHeight, windowWidth)
 
     wn.exitonclick()
     # turtle.done()
