@@ -11,6 +11,7 @@ BLOCK_SIZE = 24
 class Pen(turtle.Turtle):
     def __init__(self):
         turtle.Turtle.__init__(self)
+        self.hideturtle()
         self.penup()
         self.shape("square")
         self.color("white")
@@ -69,24 +70,39 @@ def setEntraceExit(maze):
     return maze
 
 
+def setPosition(pen, x, y, winHeight, winWidth):
+
+    scr_x = -winWidth/2 + y*BLOCK_SIZE + 0.5*BLOCK_SIZE
+    scr_y = winHeight/2 - x*BLOCK_SIZE - 0.5*BLOCK_SIZE
+
+    pen.goto(scr_x, scr_y)
+
+
+def drawPath(pen, x, y, winHeight, winWidth):
+    pen.color('green')
+    setPosition(pen, x, y, winHeight, winWidth)
+    pen.stamp()
+
+
+def erasePath(pen, x, y, winHeight, winWidth):
+    pen.color(BG_COLOR)
+    setPosition(pen, x, y, winHeight, winWidth)
+    pen.stamp()
+
 # Fungsi pembuat maze
-
-
 def init_maze(maze, windowHeight, windowWidth):
 
     pen = Pen()
 
-    for y in range(len(maze)):
-        for x in range(len(maze[y])):
+    for x in range(len(maze)):
+        for y in range(len(maze[0])):
 
-            block = maze[y][x]
+            block = maze[x][y]
 
             # Setting supaya mazenya ada di tengah window
-            scr_x = -windowWidth/2 + x*BLOCK_SIZE + 0.5*BLOCK_SIZE
-            scr_y = windowHeight/2 - y*BLOCK_SIZE - 0.5*BLOCK_SIZE
+            setPosition(pen, x, y, windowHeight, windowWidth)
 
             # Gambar tembok
-            pen.goto(scr_x, scr_y)
             if block == 'S':
                 pen.color('red')
                 pen.stamp()
@@ -139,6 +155,7 @@ def main():
     init_maze(maze, windowHeight, windowWidth)
 
     wn.exitonclick()
+    # turtle.done()
 
 
 # Memanggil program utama
