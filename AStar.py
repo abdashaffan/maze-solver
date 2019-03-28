@@ -7,7 +7,7 @@ class Block(object):
         # Koordinat posisi blok pada maze
         self.x = x
         self.y = y
-        self.parent = None  #block
+        self.parent = None  # block
         self.isAWall = (symbol == '1')
         self.F = 0
         self.G = 0
@@ -15,30 +15,32 @@ class Block(object):
 
     # method
     def setAdjacentG(self, adj):
-        adj.G += 10
+        adj.G = self.G + 1
 
     def setAdjacentH(self, finish, adj):
         # Menerima adjacent block, YANG DIRUBAH BUKAN SELFNYA
-        adj.H = abs(adj.y - finish.y) + abs(adj.x - finish.x)
+        # Heuristik: Manhattan Distance
+        adj.H = (abs(adj.y - finish.y) + abs(adj.x - finish.x))
+
+    def setAdjacentF(self, adj):
+        adj.F = adj.G + adj.H
 
     def setAdjacentParent(self, adj):
         adj.parent = self
 
-    def setParent(self, block):
-        self.parent = block
-
-    #input adalah block yang bertetangga dengan current, dan yang akan diupdate
+    # input adalah block yang bertetangga dengan current, dan yang akan diupdate
     def Update(self, adj, finish):
-        newG = self.G + 10
+        newG = self.G + 1
         if (newG < adj.G or adj.G == 0):
             self.setAdjacentG(adj)
             self.setAdjacentH(finish, adj)
+            self.setAdjacentF(adj)
             self.setAdjacentParent(adj)
 
 
 class mazeSolver(object):
     def __init__(self, maze, start, finish):
-        #Maze berupa array 2D
+        # Maze berupa array 2D
         self.maze = maze.copy()
         self.opened = []
         self.closed = []
@@ -47,8 +49,8 @@ class mazeSolver(object):
         self.finish = Block(finish[0], finish[1], maze[finish[0]][finish[1]])
 
     def initBlocks(self):
-        #dipanggil didalam method A* inti
-        #start dan finish berupa list [x,y]
+        # dipanggil didalam method A* inti
+        # start dan finish berupa list [x,y]
         row = len(self.maze)
         col = len(self.maze[0])
         for i in range(row):
@@ -56,7 +58,7 @@ class mazeSolver(object):
                 self.blockList.append(Block(i, j, self.maze[i][j]))
 
     def getBlock(self, x, y):
-        #x dan y adalah koordinat maze yang VALID
+        # x dan y adalah koordinat maze yang VALID
         for block in self.blockList:
             if (block.x == x and block.y == y):
                 return block
@@ -68,17 +70,18 @@ class mazeSolver(object):
         return False
 
     def searchLowestF(self):
-        #Mencari block dengan F value yang paling rendah
-        minFCostBlock = 10000000
+        # Mencari block dengan F value yang paling rendah
+        minFCostBlock = 100000000
         minBlock = None
         for block in self.opened:
             if (block.F < minFCostBlock):
+                minFCostBlock = block.F
                 minBlock = block
 
         return minBlock
 
     def moveBlock(self, minFBlock):
-        #memindahkan block current dari opened ke closed list
+        # memindahkan block current dari opened ke closed list
         for i in range(len(self.opened)):
             if (self.opened[i].x == minFBlock.x
                     and self.opened[i].y == minFBlock.y):
@@ -86,7 +89,7 @@ class mazeSolver(object):
                 break
 
     def getAdjacentBLock(self, currentBlock):
-        #Mengembalikan list of Block yang berisi semua tetangga dari currentBlock
+        # Mengembalikan list of Block yang berisi semua tetangga dari currentBlock
         adjacentList = []
         adjDxDy = [[1, 0], [0, 1], [-1, 0], [0, -1]]
         for d in adjDxDy:
@@ -103,12 +106,12 @@ class mazeSolver(object):
                 return True
             return False
 
-    #Hanya untuk debug
+    # Hanya untuk debug
     def printPath(self, currentBlock):
         print("Backtrack jalur yang ditemukan: ")
         block = currentBlock
         while (block.x != self.start.x or block.y != self.start.y):
-            print(block.x, block.y)
+            print("(" + str(block.x) + "," + str(block.y) + ")")
             block = block.parent
 
     def generateSolution(self, currentBlock):
@@ -123,32 +126,30 @@ class mazeSolver(object):
         solution.reverse()
         return solution
 
-    #Method utama pada kelas, mengembalikan list of point sebagai path solusi
+    # Method utama pada kelas, mengembalikan list of point sebagai path solusi
     def solveAStar(self):
-
         self.initBlocks()
-
         self.opened.append(self.start)
         while (len(self.opened) > 0):
             currentBlock = self.searchLowestF()
-            #Transfer currentBlock dari opened ke closed list
+            # Transfer currentBlock dari opened ke closed list
             self.moveBlock(currentBlock)
 
-            #basis
+            # basis
             if (currentBlock.x == self.finish.x
                     and currentBlock.y == self.finish.y):
                 return self.generateSolution(currentBlock)
 
-            #rekurens
+            # rekurens
             adjacentList = self.getAdjacentBLock(currentBlock)
             for nBlock in adjacentList:
                 if (nBlock in self.closed or nBlock.isAWall):
                     continue
                 else:
+                    currentBlock.Update(nBlock, self.finish)
+
                     if nBlock not in self.opened:
                         self.opened.append(nBlock)
-
-                    currentBlock.Update(nBlock, self.finish)
 
         if (len(self.opened <= 0)):
             return []

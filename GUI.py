@@ -110,10 +110,10 @@ def setPosition(pen, point, winHeight, winWidth):
 
 
 def drawPath(pen, point, winHeight, winWidth, mode):
-    if mode == 1:  #BFS
+    if mode == 1:  # BFS
         pen.color('green')
-    elif mode == 2:  #ASTAR
-        pen.color('yellow')
+    elif mode == 2:  # ASTAR
+        pen.color('blue')
     setPosition(pen, point, winHeight, winWidth)
     pen.stamp()
 
@@ -166,9 +166,9 @@ def main():
     maze = setEntraceExit(maze, start, finish).copy()
 
     # mengembalikan path hasil pencarian, akan digunakan pada animasi
-    #BFS
+    # BFS
     pathBFS = getBFSPath(start, finish, maze)
-    #AStar, sebelumnya membuat kelas solver terlebih dahulu
+    # AStar, sebelumnya membuat kelas solver terlebih dahulu
     AStar = mazeSolver(maze, start, finish)
     pathASTAR = AStar.solveAStar()
 
@@ -188,10 +188,10 @@ def main():
     initMaze(maze, windowHeight, windowWidth, start, finish)
 
     # Menggambar path final pada GUI
-    animatePath(pathBFS, windowHeight, windowWidth, 1)  #1 = mode BFS
-    animatePath(pathASTAR, windowHeight, windowWidth, 2)  #2 = mode ASTAR
+    animatePath(pathBFS, windowHeight, windowWidth, 1)  # 1 = mode BFS
+    animatePath(pathASTAR, windowHeight, windowWidth, 2)  # 2 = mode ASTAR
 
-    wn.exitonclick()  #Menutup window maze jika diklik
+    wn.exitonclick()  # Menutup window maze jika diklik
 
 
 # Memanggil program utama
