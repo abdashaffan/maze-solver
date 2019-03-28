@@ -1,8 +1,9 @@
-
 import turtle
 import os
 from bfs import *
+from AStar import *
 import queue
+
 
 '''
 BAGIAN PENGATURAN GUI
@@ -22,13 +23,6 @@ class Pen(turtle.Turtle):
         self.shape("square")
         self.color(PEN_COLOR)
         self.speed(0)
-
-
-class Cell():
-    def __init__(self, point, parentPoint, symbol):
-        self.point = Point(point.x, point.y)
-        self.parentPoint = Point(parentPoint.x, parentPoint.y)
-        self.isWall = (symbol == '0')
 
 
 # Fungsi pembuat maze
@@ -100,23 +94,29 @@ def setEntraceExit(maze, startPoint, finishPoint):
 
     return maze
 
+
 # Set posisi pen pada posisi window tempat penggambaran akan dilakukan
 
 
 def setPosition(pen, point, winHeight, winWidth):
 
-    scr_x = -winWidth/2 + point[1]*BLOCK_SIZE + 0.5*BLOCK_SIZE
-    scr_y = winHeight/2 - point[0]*BLOCK_SIZE - 0.5*BLOCK_SIZE
+    scr_x = -winWidth / 2 + point[1] * BLOCK_SIZE + 0.5 * BLOCK_SIZE
+    scr_y = winHeight / 2 - point[0] * BLOCK_SIZE - 0.5 * BLOCK_SIZE
 
     pen.goto(scr_x, scr_y)
+
 
 # Menggambar 1 petak path pada turtle
 
 
-def drawPath(pen, point, winHeight, winWidth):
-    pen.color('green')
+def drawPath(pen, point, winHeight, winWidth, mode):
+    if mode == 1:  #BFS
+        pen.color('green')
+    elif mode == 2:  #ASTAR
+        pen.color('yellow')
     setPosition(pen, point, winHeight, winWidth)
     pen.stamp()
+
 
 # Menghapus 1 petak path pada turtle
 
@@ -127,19 +127,10 @@ def erasePath(pen, point, winHeight, winWidth):
     pen.stamp()
 
 
-def animatePath(path, winHeight, winWidth):
+def animatePath(path, winHeight, winWidth, mode):
     pen = Pen()
     for point in path:
-        drawPath(pen, point, winHeight, winWidth)
-
-
-'''
-BAGIAN ALGORITMA PENYELESAIAN
-'''
-
-
-def manhattanDistance(p1, p2):
-    return (abs(p1.x-p2.x) + abs(p1.y-p2.y))
+        drawPath(pen, point, winHeight, winWidth, mode)
 
 
 '''
@@ -174,45 +165,16 @@ def main():
 
     maze = setEntraceExit(maze, start, finish).copy()
 
-    ############### BIKIN 1 FUNGSI SENDIRI DI bfs.py ###############
-    arrived = []
-    for i in range(len(maze)):
-        arr = []
-        for j in range(len(maze[0])):
-            arr.append(False)
-        arrived.append(arr)
-
-    q = queue.Queue()
-    q.put(start)
-    found = False
-    solusi = []
-    while (not(q.empty()) and not(found)):
-        found = BFS(q, finish, arrived, solusi, maze)
-
-    res = [solusi[0]]
-    solusi.pop(0)
-
-    while (len(res) > 0):
-        path = res.pop(0)
-
-        node = path[-1]
-        if (node == finish):
-            break
-
-        for i in solusi:
-            if (isTetangga(node, i[0])):
-                new_path = list(path)
-                for j in i:
-                    new_path.append(j)
-                res.append(new_path)
-
     # mengembalikan path hasil pencarian, akan digunakan pada animasi
-    ############### BIKIN 1 FUNGSI SENDIRI DI bfs.py ###############
+    #BFS
+    pathBFS = getBFSPath(start, finish, maze)
+    #AStar, sebelumnya membuat kelas solver terlebih dahulu
+    AStar = mazeSolver(maze, start, finish)
+    pathASTAR = AStar.solveAStar()
 
     # Set ukuran window
-    windowHeight = len(maze)*BLOCK_SIZE
-    windowWidth = len(maze[0])*BLOCK_SIZE
-
+    windowHeight = len(maze) * BLOCK_SIZE
+    windowWidth = len(maze[0]) * BLOCK_SIZE
     # Set window GUI
     wn = turtle.Screen()
     wn.bgcolor(BG_COLOR)
@@ -224,11 +186,12 @@ def main():
 
     # Membuat maze
     initMaze(maze, windowHeight, windowWidth, start, finish)
-    # Menggambar path final pada GUI
-    animatePath(path, windowHeight, windowWidth)
 
-    wn.exitonclick()
-    # turtle.done()
+    # Menggambar path final pada GUI
+    animatePath(pathBFS, windowHeight, windowWidth, 1)  #1 = mode BFS
+    animatePath(pathASTAR, windowHeight, windowWidth, 2)  #2 = mode ASTAR
+
+    wn.exitonclick()  #Menutup window maze jika diklik
 
 
 # Memanggil program utama
