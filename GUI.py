@@ -8,7 +8,7 @@ import queue
 '''
 BAGIAN PENGATURAN GUI
 '''
-BG_COLOR = 'black'
+BG_COLOR = '#24292e'
 PEN_COLOR = 'white'
 BLOCK_SIZE = 24
 
@@ -26,9 +26,12 @@ class Pen(turtle.Turtle):
 
 
 # Fungsi pembuat maze
-def initMaze(maze, windowHeight, windowWidth, startPoint, finishPoint):
+def initMaze(maze, windowHeight, windowWidth, startPoint, finishPoint, scale):
 
     pen = Pen()
+    # Untuk menyesuaikan jika mazenya terlalu besar
+    pen.resizemode("user")
+    pen.shapesize(scale, scale)
 
     for x in range(len(maze)):
         for y in range(len(maze[0])):
@@ -36,7 +39,7 @@ def initMaze(maze, windowHeight, windowWidth, startPoint, finishPoint):
             block = maze[x][y]
 
             # Setting supaya mazenya ada di tengah window
-            setPosition(pen, p, windowHeight, windowWidth)
+            setPosition(pen, p, windowHeight, windowWidth, scale)
 
             if (x == startPoint[0] and y == startPoint[1]):
                 pen.color('red')
@@ -98,7 +101,7 @@ def setEntraceExit(maze, startPoint, finishPoint):
 # Set posisi pen pada posisi window tempat penggambaran akan dilakukan
 
 
-def setPosition(pen, point, winHeight, winWidth):
+def setPosition(pen, point, winHeight, winWidth, scale=1.0):
 
     scr_x = -winWidth / 2 + point[1] * BLOCK_SIZE + 0.5 * BLOCK_SIZE
     scr_y = winHeight / 2 - point[0] * BLOCK_SIZE - 0.5 * BLOCK_SIZE
@@ -127,8 +130,10 @@ def erasePath(pen, point, winHeight, winWidth):
     pen.stamp()
 
 
-def animatePath(path, winHeight, winWidth, mode):
+def animatePath(path, winHeight, winWidth, scale, mode):
     pen = Pen()
+    pen.resizemode("user")
+    pen.shapesize(scale, scale)
     for point in path:
         drawPath(pen, point, winHeight, winWidth, mode)
 
@@ -172,24 +177,28 @@ def main():
     AStar = mazeSolver(maze, start, finish)
     pathASTAR = AStar.solveAStar()
 
-    # Set ukuran window
-    windowHeight = len(maze) * BLOCK_SIZE
-    windowWidth = len(maze[0]) * BLOCK_SIZE
     # Set window GUI
     wn = turtle.Screen()
     wn.bgcolor(BG_COLOR)
-    if (len(maze) <= 25 and len(maze[0]) <= 25):
-        wn.setup(height=1.0, width=1.0)
-    else:
-        wn.screensize(windowHeight, windowWidth)
+    wn.setup(height=1.0, width=1.0)
+    scale = 1.0
+    if (len(maze) > 40 and len(maze[0]) > 40):
+        scale = 0.5
+    elif (len(maze) > 25 and len(maze[0]) > 25):
+        scale = 0.75
     wn.title("Maze solver dengan BFS dan A*")
+    # Set ukuran window seusai ukuran maze, mengubah var global
+    global BLOCK_SIZE
+    BLOCK_SIZE *= scale
+    windowHeight = len(maze) * BLOCK_SIZE
+    windowWidth = len(maze[0]) * BLOCK_SIZE
 
     # Membuat maze
-    initMaze(maze, windowHeight, windowWidth, start, finish)
-
+    initMaze(maze, windowHeight, windowWidth, start, finish, scale)
     # Menggambar path final pada GUI
-    animatePath(pathBFS, windowHeight, windowWidth, 1)  # 1 = mode BFS
-    animatePath(pathASTAR, windowHeight, windowWidth, 2)  # 2 = mode ASTAR
+    animatePath(pathBFS, windowHeight, windowWidth, scale, 1)  # 1 = mode BFS
+    animatePath(pathASTAR, windowHeight, windowWidth,
+                scale, 2)  # 2 = mode ASTAR
 
     wn.exitonclick()  # Menutup window maze jika diklik
 
