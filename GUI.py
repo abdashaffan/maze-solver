@@ -196,7 +196,7 @@ def main():
     # Membuat maze
     initMaze(maze, windowHeight, windowWidth, start, finish, scale)
     # Menggambar path final pada GUI
-    # animatePath(pathBFS, windowHeight, windowWidth, scale, 1)  # 1 = mode BFS
+    animatePath(pathBFS, windowHeight, windowWidth, scale, 1)  # 1 = mode BFS
     animatePath(pathASTAR, windowHeight, windowWidth,
                 scale, 2)  # 2 = mode ASTAR
 
