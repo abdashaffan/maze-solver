@@ -18,7 +18,7 @@ Run **Main.exe** inside source folder.
 
 Run `python GUI.py` on terminal inside source folder.
 
-** Make sure to include your maze `.txt` file inside mazes folder. **
+**Make sure to include your maze `.txt` file inside mazes folder.**
 
 
 
