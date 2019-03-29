@@ -14,7 +14,7 @@ Solve matrix generated maze using BFS and A* (A-star) algorithm.
 Run **Main.exe** inside source folder.
 
 
-### Linux:
+### Linux and Mac:
 
 Run `python GUI.py` on terminal inside source folder.
 
