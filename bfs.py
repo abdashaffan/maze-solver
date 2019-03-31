@@ -1,28 +1,6 @@
 import queue as queue
 
-
-def CekTetangga(start, arrived, matriks):
-    brs = len(matriks)
-    kol = len(matriks[0])
-    b = start[0]
-    k = start[1]
-    count = 0
-    if (b - 1 >= 0):
-        if (matriks[b - 1][k] == 0 and not (arrived[b - 1][k])):
-            count = count + 1
-    if (b + 1 < brs):
-        if (matriks[b + 1][k] == 0 and not (arrived[b + 1][k])):
-            count = count + 1
-    if (k - 1 >= 0):
-        if (matriks[b][k - 1] == 0 and not (arrived[b][k - 1])):
-            count = count + 1
-    if (k + 1 < kol):
-        if (matriks[b][k + 1] == 0 and not (arrived[b][k + 1])):
-            count = count + 1
-    return count
-
-
-def getTetangga(start, arrived, matriks):
+def getChild(start, arrived, matriks):
     brs = len(matriks)
     kol = len(matriks[0])
     b = start[0]
@@ -43,89 +21,40 @@ def getTetangga(start, arrived, matriks):
 
     return res
 
-
-def isTetangga(A, B):
-    if (A[0] == B[0]):
-        if (A[1] == B[1] - 1):
-            return True
-        elif (A[1] == B[1] + 1):
-            return True
-        else:
-            return False
-    elif (A[1] == B[1]):
-        if (A[0] == B[0] - 1):
-            return True
-        elif (A[0] == B[0] + 1):
-            return True
-        else:
-            return False
-    else:
-        return False
-
-
-def BFS(q, akhir, arrived, solusi, maze):
+def BFS(start, finish, maze):
+    # Proses inisialisasi pembentukan matriks maze dan arrived
     brs = len(maze)
     kol = len(maze[0])
     matriks = []
+    arrived = []
     for i in range(brs):
         M = []
+        arr = []
         for j in range(kol):
             M.append(int(maze[i][j]))
-        matriks.append(M)
-    start = q.get()
-    arrived[start[0]][start[1]] = True
-    tetangga = CekTetangga(start, arrived, matriks)
-    jalur = [start]
-
-    while (tetangga == 1):
-        next = getTetangga(start, arrived, matriks)[0]
-        tetangga = CekTetangga(next, arrived, matriks)
-        start = next
-        arrived[start[0]][start[1]] = True
-        jalur.append(start)
-
-    if (start == akhir):
-        solusi.append(jalur)
-        return True
-    else:
-        if (tetangga == 0):
-            return False
-        else:
-            for i in getTetangga(start, arrived, matriks):
-                q.put(i)
-            solusi.append(jalur)
-            return False
-
-
-def getBFSPath(start, finish, maze):
-    arrived = []
-    for i in range(len(maze)):
-        arr = []
-        for j in range(len(maze[0])):
             arr.append(False)
+        
+        matriks.append(M)
         arrived.append(arr)
+    
+    # Panggil fungsi getBFSPath untuk dapat jalur
+    return getBFSPath(start,finish,arrived,matriks)
 
-    q = queue.Queue()
-    q.put(start)
-    found = False
-    solusi = []
-    while (not (q.empty()) and not (found)):
-        found = BFS(q, finish, arrived, solusi, maze)
-
-    res = [solusi[0]]
-    solusi.pop(0)
-
-    while (len(res) > 0):
-        path = res.pop(0)
-
+def getBFSPath(start, finish, arrived, matriks):
+    queue = []
+    queue.append([start])
+    while queue:
+        path = queue.pop(0)
         node = path[-1]
+        arrived[node[0]][node[1]] = True
+        
+        #Jika sudah selesai return jalur
         if (node == finish):
-            break
+            return path
 
-        for i in solusi:
-            if (isTetangga(node, i[0])):
-                new_path = list(path)
-                for j in i:
-                    new_path.append(j)
-                res.append(new_path)
-    return path
+        # Menambahkan antrian setiap node anaknya
+        for n in getChild(node, arrived, matriks):
+            temp = list(path)
+            temp.append(n)
+            queue.append(temp)
+            # Isi queue adalah jalur-jalur yang telah dilewati

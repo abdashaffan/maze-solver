@@ -172,7 +172,7 @@ def main():
 
     # mengembalikan path hasil pencarian, akan digunakan pada animasi
     # BFS
-    pathBFS = getBFSPath(start, finish, maze)
+    pathBFS = BFS(start, finish, maze)
     # AStar, sebelumnya membuat kelas solver terlebih dahulu
     AStar = mazeSolver(maze, start, finish)
     pathASTAR = AStar.solveAStar()
